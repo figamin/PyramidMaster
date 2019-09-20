@@ -35,17 +35,18 @@ def drive_direct_command(right_velocity, left_velocity):
         left_1, left_2 = int_to_twos_complement(left_velocity)
         send_commands(ropcodes.DRIVE_DIRECT + " " + right_1 + " " + right_2 + " " + left_1 + " " + left_2)
 
-
+"""Returns outputs of the wall and four cliff sensors."""
 def wall_or_cliff_seen():
     send_commands(ropcodes.QUERY_LIST + " 5 " + ropcodes.WALL + " "
     + ropcodes.CLIFF_LEFT + " " + ropcodes.CLIFF_FRONT_LEFT + " "
     + ropcodes.CLIFF_FRONT_RIGHT + " " + ropcodes.CLIFF_RIGHT)
-    wall_status = connect.read(1)
-    if wall_status is 0:
-        return False
-    else:
-        return True
-
+    sensors_output = connect.read(5)
+    sensors_statuses = [False, False, False, False, False]
+    for i in sensors_statuses:
+        if sensors_output % 10 == 1:
+            sensors_statuses[i] = True
+        sensors_output /= 10
+    return sensors_statuses
 # def motors_command(selected_motor, power_state)
 """Sends given commands to the Roomba."""
 def send_commands(commands):
